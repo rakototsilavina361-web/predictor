@@ -2,59 +2,53 @@
 <html lang="mg">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Predictor +1.5 Extérieur</title>
+    <title>Predictor Foot PRO</title>
     <style>
-        body { background: #0f172a; color: #fff; font-family: sans-serif; display: flex; justify-content: center; padding: 20px; }
-        .card { background: #1e293b; padding: 25px; border-radius: 15px; width: 100%; max-width: 400px; text-align: center; border: 2px solid #334155; }
-        h1 { color: #f472b6; font-size: 22px; }
-        input { margin: 15px 0; display: block; width: 100%; }
-        button { background: #f472b6; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
-        #result { margin-top: 20px; padding: 15px; border-radius: 8px; display: none; font-weight: bold; }
-        .success { background: #10b981; }
-        .fail { background: #e11d48; }
+        body { background: #0f172a; color: #fff; font-family: sans-serif; padding: 20px; }
+        .card { background: #1e293b; padding: 20px; border-radius: 15px; max-width: 400px; margin: auto; text-align: center; }
+        .btn { background: #f472b6; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        #results { margin-top: 20px; text-align: left; }
+        .match-card { background: #334155; padding: 10px; margin-bottom: 5px; border-radius: 5px; font-size: 14px; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h1>⚽ PREDICTOR +1.5 EXT</h1>
-    <p style="font-size: 12px; color: #94a3b8;">Asio capture ny match-nao eto:</p>
-    
+    <h1>⚽ PREDICTOR FOOT PRO</h1>
     <input type="file" id="upload" accept="image/*">
-    <button onclick="analyzeMatch()">PREDICT</button>
-
-    <div id="result"></div>
+    <button class="btn" onclick="analyze()">ANALYZER LES MATCHS</button>
+    <div id="results"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
 <script>
-    async function analyzeMatch() {
+    async function analyze() {
         const file = document.getElementById('upload').files[0];
-        const resultDiv = document.getElementById('result');
+        const resDiv = document.getElementById('results');
+        if (!file) { alert("Mifidiana sary!"); return; }
         
-        if (!file) { alert("Mifidiana sary aloha!"); return; }
-
-        resultDiv.style.display = "block";
-        resultDiv.className = "";
-        resultDiv.innerHTML = "Mamakafaka ny sary... ⏳";
-
-        try {
-            const { data: { text } } = await Tesseract.recognize(file, 'eng');
+        resDiv.innerHTML = "Mamakafaka ireo match... ⏳";
+        
+        const { data: { text } } = await Tesseract.recognize(file, 'eng');
+        
+        // Fikajiana: Mitady isa miendrika cote (ohatra: 2.03, 1.81)
+        const regex = /\d\.\d{2}/g;
+        const cotes = text.match(regex);
+        
+        if (cotes) {
+            // Manivana ireo cote "Assuré" (ohatra 1.50 - 2.10)
+            const assured = cotes.filter(c => parseFloat(c) >= 1.50 && parseFloat(c) <= 2.10);
             
-            // Logic: Raha misy soratra toy ny '1.5' na 'Ext' ao anaty sary
-            if (text.includes("1.5") || text.toLowerCase().includes("ext")) {
-                resultDiv.className = "success";
-                resultDiv.innerHTML = "✅ VALIDÉ: Tsara ho an'ny +1.5 Extérieur! 📈";
+            if (assured.length >= 6) {
+                resDiv.innerHTML = "<h3>✅ MATCH ASSURÉ (6+):</h3>" + 
+                    assured.slice(0, 8).map(c => `<div class="match-card">Lalao: Cote ${c} (VALIDÉ)</div>`).join('');
             } else {
-                resultDiv.className = "fail";
-                resultDiv.innerHTML = "❌ AZA RAISINA: Tsy mifanaraka amin'ny stratejia.";
+                resDiv.innerHTML = "❌ Tsy ampy ny match assuré hita (latsaky ny 6).";
             }
-        } catch (err) {
-            resultDiv.innerHTML = "❌ Nisy olana teo amin'ny famakiana sary.";
+        } else {
+            resDiv.innerHTML = "❌ Tsy nahita cote tao amin'ilay sary.";
         }
     }
 </script>
-
 </body>
-</html>
+    </html>
