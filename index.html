@@ -5,50 +5,40 @@
     <title>Predictor Foot PRO</title>
     <style>
         body { background: #0f172a; color: #fff; font-family: sans-serif; padding: 20px; }
-        .card { background: #1e293b; padding: 20px; border-radius: 15px; max-width: 400px; margin: auto; text-align: center; }
-        .btn { background: #f472b6; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        #results { margin-top: 20px; text-align: left; }
-        .match-card { background: #334155; padding: 10px; margin-bottom: 5px; border-radius: 5px; font-size: 14px; }
+        .card { background: #1e293b; padding: 20px; border-radius: 15px; max-width: 400px; margin: auto; }
+        .btn { background: #e11d48; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .result-item { background: #10b981; padding: 10px; margin-top: 10px; border-radius: 5px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h1>⚽ PREDICTOR FOOT PRO</h1>
-    <input type="file" id="upload" accept="image/*">
-    <button class="btn" onclick="analyze()">ANALYZER LES MATCHS</button>
+    <h2 style="text-align:center;">⚽ PREDICTOR PRO</h2>
+    <p style="font-size: 13px;">Mampiditra ireo cote "Total Extérieur 1.5" (misaraka amin'ny famantarana , na habaka):</p>
+    <textarea id="cotesInput" style="width:100%; height:80px; border-radius:5px;" placeholder="Ex: 2.03 4.41 5.80 3.33 2.56 6.62 2.26 1.50 1.56 1.81"></textarea>
+    <button class="btn" onclick="analyzeManual()">PREDICT ASSURÉ</button>
     <div id="results"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
 <script>
-    async function analyze() {
-        const file = document.getElementById('upload').files[0];
+    function analyzeManual() {
+        const input = document.getElementById('cotesInput').value;
         const resDiv = document.getElementById('results');
-        if (!file) { alert("Mifidiana sary!"); return; }
+        // Mitady ireo isa rehetra ao amin'ny text
+        const cotes = input.match(/\d\.\d{2}/g);
         
-        resDiv.innerHTML = "Mamakafaka ireo match... ⏳";
+        if (!cotes) { resDiv.innerHTML = "❌ Diso ny fampidirana isa."; return; }
+
+        // Fepetra: 1.50 hatramin'ny 2.10 no tena "Assuré"
+        const filtered = cotes.filter(c => parseFloat(c) >= 1.50 && parseFloat(c) <= 2.10);
         
-        const { data: { text } } = await Tesseract.recognize(file, 'eng');
-        
-        // Fikajiana: Mitady isa miendrika cote (ohatra: 2.03, 1.81)
-        const regex = /\d\.\d{2}/g;
-        const cotes = text.match(regex);
-        
-        if (cotes) {
-            // Manivana ireo cote "Assuré" (ohatra 1.50 - 2.10)
-            const assured = cotes.filter(c => parseFloat(c) >= 1.50 && parseFloat(c) <= 2.10);
-            
-            if (assured.length >= 6) {
-                resDiv.innerHTML = "<h3>✅ MATCH ASSURÉ (6+):</h3>" + 
-                    assured.slice(0, 8).map(c => `<div class="match-card">Lalao: Cote ${c} (VALIDÉ)</div>`).join('');
-            } else {
-                resDiv.innerHTML = "❌ Tsy ampy ny match assuré hita (latsaky ny 6).";
-            }
+        if (filtered.length >= 2) {
+            resDiv.innerHTML = "<h3>✅ Match 2 Assuré hitako:</h3>" + 
+                filtered.slice(0, 2).map(c => `<div class="result-item">Cote: ${c} (VALIDÉ)</div>`).join('');
         } else {
-            resDiv.innerHTML = "❌ Tsy nahita cote tao amin'ilay sary.";
+            resDiv.innerHTML = "❌ Tsy misy match "assuré" hita amin'io lisitra io.";
         }
     }
 </script>
 </body>
-    </html>
+</html>
